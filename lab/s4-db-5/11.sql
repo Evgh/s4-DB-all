@@ -1,0 +1,111 @@
+USE E_Univer;
+DROP TABLE TIMETABLE;
+DROP TABLE WEEK_DAYS;
+DROP TABLE LESSONS;
+
+CREATE TABLE WEEK_DAYS 
+(
+	WDAY char(2) constraint WEEK_DAYS_PK primary key 
+				 constraint WEEK_DAYS_CHECK check (WDAY in ('Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'))
+) 
+
+CREATE TABLE LESSONS 
+(
+	LESSON integer constraint LESSONS_LESSON_PK primary key,
+	LESSON_TIME char(11) constraint  LESSONS_LESSON_TIME_CHECK check (LESSON_TIME Like '__:__-__:__')
+)
+
+CREATE TABLE TIMETABLE 
+(
+	IDTIMETABLE integer identity(1,1) constraint TIMETABLE_PK  primary key,
+	IDGROUP integer constraint TIMETABLE_IDGROUP_FK foreign key 
+					references GROUPS(IDGROUP),
+	AUDITORIUM char(20) constraint TIMETABLE_AUDITORIUM_FK foreign key 
+					references AUDITORIUM(AUDITORIUM),
+	SUBJECT char(10) constraint TIMETABLE_SUBJECT_FK foreign key
+					references SUBJECT(SUBJECT),
+	TEACHER char(10) constraint TIMETABLE_TEACHER_FK foreign key 
+					references TEACHER(TEACHER),
+	WDAY char(2) constraint TIMETABLE_WDAY_FK
+					references WEEK_DAYS(WDAY),
+	LESSON integer constraint TIMETABLE_LESSON_FK
+					references LESSONS(LESSON)
+) on G1
+
+
+INSERT into WEEK_DAYS (WDAY) values ('Пн'), ('Вт');  
+INSERT into LESSONS (LESSON, LESSON_TIME) values 
+	(1, '08:00-09:35'),
+	(2, '10:50-11:25'),
+	(3, '11:40-13:15'),
+	(4, '13:50-15:25'),
+	(5, '15:40-17:15');
+
+INSERT into TIMETABLE (IDGROUP, AUDITORIUM, SUBJECT, TEACHER, WDAY, LESSON) values 
+	(1, '206-1', 'ОАиП', 'ЖЛК', 'Пн', 1), 
+	(1, '301-1', 'МП', 'СМЛВ', 'Пн', 2),
+	(1, '423-1', 'ПИС', 'УРБ', 'Пн', 3),
+
+	(2, '313-1', 'ОАиП', 'СМЛВ', 'Пн', 1), 
+	(2, '408-2', 'МП', 'БРКВЧ', 'Пн', 2),
+	(2, '324-1', 'МП','ЖЛК', 'Пн', 3),
+	(2, '413-1', 'ПИС', 'УРБ', 'Пн', 5),
+
+	(4, '413-1', 'ОАиП', 'БРКВЧ', 'Пн', 1), 
+	(4, '413-1', 'МП', 'ЖЛК', 'Пн', 2),
+	(4, '301-1', 'МП','СМЛВ', 'Пн', 3),
+	(4, '324-1', 'МП','УРБ', 'Пн', 4),
+	(4, '413-1', 'ПИС', 'ЖЛК', 'Пн', 5),
+
+	(3, '236-1', 'ОАиП', 'ЖЛК', 'Вт', 1), 
+	(3, '324-1', 'МП', 'СМЛВ', 'Вт', 2),
+	(3, '413-1', 'МП','БРКВЧ', 'Вт', 3),
+	(3, '236-1', 'МП','СМЛВ', 'Вт', 4),
+	(3, '301-1', 'ПИС', '', 'Вт', 5);
+
+-- Когда какие аудитории свободны
+SELECT WEEK_DAYS.WDAY [День недели], LESSONS.LESSON [Пара], LESSONS.LESSON_TIME [Время], AUDITORIUM.AUDITORIUM_NAME [Аудитория] 
+		FROM WEEK_DAYS CROSS JOIN LESSONS CROSS JOIN AUDITORIUM 
+			LEFT OUTER JOIN TIMETABLE 
+				ON TIMETABLE.WDAY = WEEK_DAYS.WDAY 
+				AND TIMETABLE.LESSON = LESSONS.LESSON
+				AND TIMETABLE.AUDITORIUM = AUDITORIUM.AUDITORIUM
+		WHERE TIMETABLE.IDTIMETABLE is null
+		ORDER BY WEEK_DAYS.WDAY DESC, LESSONS.LESSON, AUDITORIUM.AUDITORIUM_NAME;
+
+-- Какие аудитории свободны в понедельник в первую пару
+SELECT WEEK_DAYS.WDAY [День недели], LESSONS.LESSON [Пара], LESSONS.LESSON_TIME [Время], AUDITORIUM.AUDITORIUM_NAME [Аудитория] 
+		FROM WEEK_DAYS CROSS JOIN LESSONS CROSS JOIN AUDITORIUM 
+			LEFT OUTER JOIN TIMETABLE 
+				ON TIMETABLE.WDAY = WEEK_DAYS.WDAY 
+				AND TIMETABLE.LESSON = LESSONS.LESSON
+				AND TIMETABLE.AUDITORIUM = AUDITORIUM.AUDITORIUM
+		WHERE TIMETABLE.IDTIMETABLE is null AND WEEK_DAYS.WDAY = 'Пн' AND LESSONS.LESSON = 1
+		ORDER BY WEEK_DAYS.WDAY DESC, LESSONS.LESSON, AUDITORIUM.AUDITORIUM_NAME;
+
+-- Окна в расписании преподов
+SELECT TEACHER.TEACHER_NAME [Преподаватель], WEEK_DAYS.WDAY [День недели], LESSONS.LESSON [Пара], LESSONS.LESSON_TIME [Время]  
+		FROM WEEK_DAYS CROSS JOIN LESSONS CROSS JOIN TEACHER
+			LEFT OUTER JOIN TIMETABLE 
+				ON TIMETABLE.WDAY = WEEK_DAYS.WDAY 
+				AND TIMETABLE.LESSON = LESSONS.LESSON
+				AND TIMETABLE.TEACHER = TEACHER.TEACHER
+		WHERE   TIMETABLE.IDTIMETABLE is null
+				AND TEACHER.TEACHER IN (SELECT TEACHER.TEACHER FROM TEACHER JOIN TIMETABLE ON TEACHER.TEACHER = TIMETABLE.TEACHER)
+		ORDER BY TEACHER.TEACHER_NAME, WEEK_DAYS.WDAY DESC, LESSONS.LESSON;
+
+-- Когда у какой группы нет пар
+SELECT GROUPS.IDGROUP [Группа], WEEK_DAYS.WDAY [День недели], LESSONS.LESSON [Пара], LESSONS.LESSON_TIME [Время]   
+		FROM WEEK_DAYS CROSS JOIN LESSONS CROSS JOIN GROUPS
+			LEFT OUTER JOIN TIMETABLE 
+				ON TIMETABLE.WDAY = WEEK_DAYS.WDAY 
+				AND TIMETABLE.LESSON = LESSONS.LESSON
+				AND TIMETABLE.IDGROUP = GROUPS.IDGROUP
+		WHERE	TIMETABLE.IDTIMETABLE is null
+				AND GROUPS.IDGROUP IN (SELECT GROUPS.IDGROUP FROM GROUPS JOIN TIMETABLE ON GROUPS.IDGROUP = TIMETABLE.IDGROUP)
+		ORDER BY GROUPS.IDGROUP, WEEK_DAYS.WDAY DESC, LESSONS.LESSON;
+
+
+		
+
+				

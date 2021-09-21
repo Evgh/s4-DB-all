@@ -1,0 +1,6 @@
+USE KASPER_UNIVER;
+
+UPDATE STUDENT Set Группа = 5;
+DELETE FROM STUDENT Where Номер_зачетки = 6;
+
+SELECT *FROM STUDENT;
