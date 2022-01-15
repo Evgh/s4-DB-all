@@ -9,7 +9,7 @@ Unfortunately the university database was filled with Russian characters and the
 
 № | Repozitory | Description | 
 :-|:--------:|:------------|
-02| s4-db-1 | Introduction: create table, select |
+01| s4-db-1 | Introduction: create table, select |
 03| s4-db-3 | T-SQL data types, integrity constraints, predicates | 
 04| s4-db-4 | Foreign key, filegroups | 
 05| s4-db-5 | Join |
