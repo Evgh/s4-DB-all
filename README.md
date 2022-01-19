@@ -5,9 +5,8 @@ You can find tasks in the file "ПрактикумБазыДанных.doc". You
 
 _**Unfortunately the university database was filled with Russian characters and the encoding could be corrupted, that's why I strongly recommend you to open files with notepad.**_ 
 
-First I learned the basics, then I worked with more complex tools, such as transactions, functions, procedures.
-
 ## Brief description
+First I learned the basics, then I worked with more complex tools, such as transactions, functions, procedures.
 
 № | Repozitory | Description | 
 :-|:--------:|:------------|
