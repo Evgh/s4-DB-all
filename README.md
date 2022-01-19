@@ -3,7 +3,7 @@ These are T-SQL scripts created while studying databases in university. I worked
 
 You can find tasks in the file "ПрактикумБазыДанных.doc". You can find solution for each laboratory work in a folder with the corresponding name. 
 
-_*Unfortunately the university database was filled with Russian characters and the encoding could be corrupted, that's why I strongly recommend you to open files with notepad.*_ 
+_**Unfortunately the university database was filled with Russian characters and the encoding could be corrupted, that's why I strongly recommend you to open files with notepad.**_ 
 
 First I learned the basics, then I worked with more complex tools, such as transactions, functions, procedures.
 
